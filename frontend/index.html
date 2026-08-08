@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Authentication</title>
+    <style>
+        /* Modern CSS Styling */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h2 { color: #333; font-weight: 600; font-size: 24px; margin-bottom: 5px; }
+        .header p { color: #777; font-size: 14px; }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; color: #555; font-size: 14px; font-weight: 500; }
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .input-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+        .btn:active:not(:disabled) { transform: translateY(0); }
+        .btn:disabled {
+            background: #a0a0a0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .links { text-align: center; margin-top: 20px; font-size: 14px; }
+        .links a { color: #667eea; text-decoration: none; font-weight: 500; cursor: pointer; transition: color 0.3s; }
+        .links a:hover { color: #764ba2; text-decoration: underline; }
+        
+        .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .flex-between a { font-size: 13px; color: #667eea; text-decoration: none; cursor: pointer; }
+        
+        .hidden { display: none !important; }
+
+        /* Alert Messages */
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+        .alert.error { background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; display: block; }
+        .alert.success { background: #d1fae5; color: #10b981; border: 1px solid #6ee7b7; display: block; }
+
+        .pwd-hint { font-size: 11px; color: #888; margin-top: 5px; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="alert-box" class="alert"></div>
+
+    <!-- 1. LOGIN SECTION -->
+    <div id="login-section">
+        <div class="header">
+            <h2>Welcome Back</h2>
+            <p>Login to your secure account</p>
+        </div>
+        <form onsubmit="event.preventDefault(); handleLogin();">
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="login-email" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group" style="margin-bottom: 5px;">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="Enter your password" required>
+            </div>
+            <div class="flex-between">
+                <label style="font-size: 13px; color: #555;"><input type="checkbox"> Remember me</label>
+                <a onclick="switchSection('forgot-section')">Forgot Password?</a>
+            </div>
+            <button type="submit" id="login-btn" class="btn">Login</button>
+        </form>
+        <div class="links">
+            Don't have an account? <a onclick="switchSection('register-section')">Sign Up</a>
+        </div>
+    </div>
+
+    <!-- 2. REGISTER SECTION -->
+    <div id="register-section" class="hidden">
+        <div class="header">
+            <h2>Create Account</h2>
+            <p>Join our secure platform</p>
+        </div>
+        <form onsubmit="event.preventDefault(); handleRegister();">
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="reg-email" placeholder="example@domain.com" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="reg-password" placeholder="Create a strong password" required>
+                <span class="pwd-hint">Min 8 chars, 1 uppercase, 1 number, 1 symbol</span>
+            </div>
+            <button type="submit" class="btn">Create Account</button>
+        </form>
+        <div class="links">
+            Already have an account? <a onclick="switchSection('login-section')">Login</a>
+        </div>
+    </div>
+
+    <!-- 3. 2FA VERIFICATION SECTION -->
+    <div id="2fa-section" class="hidden">
+        <div class="header">
+            <h2>Security Verification</h2>
+            <p>Enter the 6-digit code sent to your Gmail</p>
+        </div>
+        <form onsubmit="event.preventDefault(); handle2FA();">
+            <div class="input-group">
+                <label>Verification Code (OTP)</label>
+                <input type="text" id="otp-code" placeholder="e.g. 123456" required autocomplete="off" maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 5px;">
+            </div>
+            <button type="submit" class="btn">Verify & Login</button>
+        </form>
+        <div class="links">
+            <a onclick="switchSection('login-section')">Back to Login</a>
+        </div>
+    </div>
+
+    <!-- 4. FORGOT PASSWORD SECTION -->
+    <div id="forgot-section" class="hidden">
+        <div class="header">
+            <h2>Find Account</h2>
+            <p>We'll send you a recovery token</p>
+        </div>
+        <form onsubmit="event.preventDefault(); handleForgotPassword();">
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="forgot-email" placeholder="Enter your registered email" required>
+            </div>
+            <button type="submit" class="btn">Send Reset Link</button>
+        </form>
+        <div class="links">
+            Remembered? <a onclick="switchSection('login-section')">Back to Login</a>
+        </div>
+    </div>
+
+    <!-- 5. RESET PASSWORD SECTION -->
+    <div id="reset-section" class="hidden">
+        <div class="header">
+            <h2>New Password</h2>
+            <p>Enter the token from your email</p>
+        </div>
+        <form onsubmit="event.preventDefault(); handleResetPassword();">
+            <div class="input-group">
+                <label>Reset Token</label>
+                <input type="text" id="reset-token" placeholder="Paste the long token here" required>
+            </div>
+            <div class="input-group">
+                <label>New Password</label>
+                <input type="password" id="reset-new-password" placeholder="Enter new strong password" required>
+            </div>
+            <button type="submit" class="btn">Update Password</button>
+        </form>
+        <div class="links">
+            <a onclick="switchSection('login-section')">Back to Login</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:3000/auth';
+    let tempUserIdFor2FA = '';
+    let countdownInterval;
+
+    // পেজ লোড হওয়ার সময় চেক করবে আগে থেকে লক করা আছে কিনা
+    document.addEventListener("DOMContentLoaded", () => {
+        const lockoutTarget = localStorage.getItem('lockoutTarget');
+        if (lockoutTarget) {
+            const now = Date.now();
+            const timeLeft = Math.ceil((parseInt(lockoutTarget) - now) / 1000);
+            if (timeLeft > 0) {
+                resumeLockdownTimer(lockoutTarget);
+            } else {
+                localStorage.removeItem('lockoutTarget');
+            }
+        }
+    });
+
+    function switchSection(sectionId) {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('register-section').classList.add('hidden');
+        document.getElementById('2fa-section').classList.add('hidden');
+        document.getElementById('forgot-section').classList.add('hidden');
+        document.getElementById('reset-section').classList.add('hidden');
+        
+        document.getElementById(sectionId).classList.remove('hidden');
+        hideAlert(); // নতুন পেজে গেলে আগের এলার্ট মুছে যাবে
+    }
+
+    function showAlert(message, isSuccess = false) {
+        const alertBox = document.getElementById('alert-box');
+        alertBox.className = 'alert ' + (isSuccess ? 'success' : 'error');
+        alertBox.innerText = message;
+    }
+
+    function hideAlert() {
+        document.getElementById('alert-box').className = 'alert';
+    }
+
+    function startLockdownTimer(durationInSeconds) {
+        const targetTime = Date.now() + (durationInSeconds * 1000);
+        localStorage.setItem('lockoutTarget', targetTime);
+        resumeLockdownTimer(targetTime);
+    }
+
+    function resumeLockdownTimer(targetTime) {
+        const loginBtn = document.getElementById('login-btn');
+        const passwordInput = document.getElementById('login-password');
+        
+        loginBtn.disabled = true;
+        passwordInput.disabled = true;
+
+        clearInterval(countdownInterval);
+
+        let initialTimeLeft = Math.ceil((targetTime - Date.now()) / 1000);
+        if (initialTimeLeft > 0) {
+            showAlert(`Account locked. Try again in ${initialTimeLeft}s.`);
+            loginBtn.innerText = `Locked (${initialTimeLeft}s)`;
+        }
+
+        countdownInterval = setInterval(() => {
+            const now = Date.now();
+            const timeLeft = Math.ceil((targetTime - now) / 1000);
+
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                localStorage.removeItem('lockoutTarget');
+                loginBtn.disabled = false;
+                passwordInput.disabled = false;
+                loginBtn.innerText = 'Login';
+                hideAlert();
+            } else {
+                showAlert(`Account locked. Try again in ${timeLeft}s.`);
+                loginBtn.innerText = `Locked (${timeLeft}s)`;
+            }
+        }, 1000);
+    }
+
+    async function handleLogin() {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        
+        try {
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                const errorMessage = Array.isArray(data.message) ? data.message.join(' ') : data.message;
+                
+                if (errorMessage && (errorMessage.includes('locked') || errorMessage.includes('attempt'))) {
+                    if (errorMessage.includes('locked') || errorMessage.includes('30')) {
+                        startLockdownTimer(30);
+                        return;
+                    }
+                }
+                throw new Error(Array.isArray(data.message) ? data.message[0] : data.message);
+            }
+
+            // সফল রেসপন্স: 2FA চেক করবে
+            if (data.require2FA) {
+                tempUserIdFor2FA = data.userId;
+                switchSection('2fa-section'); // আগে 2FA পেজে যাবে
+                showAlert('OTP code sent to your Gmail!', true); // এরপর সেখানে এলার্টটি দেখাবে
+            } else {
+                localStorage.setItem('token', data.access_token);
+                showAlert('Login successful! Redirecting...', true);
+                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+            }
+
+        } catch (error) {
+            showAlert(error.message);
+        }
+    }
+
+    async function handleRegister() {
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+
+        try {
+            const response = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(Array.isArray(data.message) ? data.message[0] : data.message);
+
+            showAlert('Registration successful! Please login.', true);
+            document.getElementById('reg-email').value = '';
+            document.getElementById('reg-password').value = '';
+            setTimeout(() => switchSection('login-section'), 2000);
+
+        } catch (error) {
+            showAlert(error.message);
+        }
+    }
+
+    async function handle2FA() {
+        const token = document.getElementById('otp-code').value;
+        
+        try {
+            const response = await fetch(`${API_URL}/2fa/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: tempUserIdFor2FA, token })
+            });
+            const data = await response.json();
+            
+            if (!response.ok) throw new Error(data.message || 'Invalid OTP code');
+            
+            localStorage.setItem('token', data.access_token);
+            showAlert('Verified successfully! Redirecting...', true);
+            setTimeout(() => window.location.href = 'dashboard.html', 1500);
+        } catch (error) {
+            showAlert(error.message);
+        }
+    }
+
+    async function handleForgotPassword() {
+        const email = document.getElementById('forgot-email').value;
+
+        try {
+            const response = await fetch(`${API_URL}/forgot-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(data.message || 'Error sending request');
+
+            showAlert('Token sent to your email!', true);
+            setTimeout(() => switchSection('reset-section'), 2000);
+            
+        } catch (error) {
+            showAlert(error.message);
+        }
+    }
+
+    async function handleResetPassword() {
+        const token = document.getElementById('reset-token').value;
+        const newPassword = document.getElementById('reset-new-password').value;
+
+        try {
+            const response = await fetch(`${API_URL}/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, newPassword })
+            });
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(Array.isArray(data.message) ? data.message[0] : data.message);
+
+            showAlert('Password updated successfully! Please login.', true);
+            
+            document.getElementById('reset-token').value = '';
+            document.getElementById('reset-new-password').value = '';
+            setTimeout(() => switchSection('login-section'), 2000);
+
+        } catch (error) {
+            showAlert(error.message);
+        }
+    }
+</script>
+</body>
+</html>

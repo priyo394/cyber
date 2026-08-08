@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body { background-color: #f3f4f6; color: #333; }
+
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .navbar h2 { font-size: 22px; font-weight: 600; letter-spacing: 1px; }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover { background: white; color: #764ba2; }
+
+        /* Main Container */
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .dashboard-header h3 { font-size: 20px; color: #444; }
+
+        /* Table Card Styling */
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        thead { background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+        th { padding: 16px 24px; font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 16px 24px; font-size: 14px; color: #374151; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+        tbody tr:hover { background-color: #f9fafb; }
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* Badges */
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block; }
+        .badge-admin { background-color: #ede9fe; color: #5b21b6; }
+        .badge-user { background-color: #e0f2fe; color: #0369a1; }
+        .badge-active { background-color: #d1fae5; color: #065f46; }
+        .badge-blocked { background-color: #fee2e2; color: #991b1b; }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: 0.2s;
+            color: white;
+        }
+        .block-btn { background-color: #ef4444; }
+        .block-btn:hover { background-color: #dc2626; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3); }
+        .unblock-btn { background-color: #10b981; }
+        .unblock-btn:hover { background-color: #059669; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
+        .disabled-text { color: #9ca3af; font-size: 13px; font-weight: 500; }
+
+        /* Error Message */
+        #error-msg { text-align: center; margin-top: 50px; font-size: 18px; color: #ef4444; font-weight: 500; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<div class="navbar">
+    <h2>Secure Auth</h2>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="container">
+    <div id="error-msg"></div>
+
+    <div id="admin-panel" class="hidden">
+        <div class="dashboard-header">
+            <h3>Registered Users Management</h3>
+        </div>
+        
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Email</th>
+                        <th>Role</th>
+                        <th>Failed Attempts</th>
+                        <th>Account Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table">
+                    <!-- Users will be injected here via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+        window.location.href = 'index.html';
+    }
+
+    async function loadUsers() {
+        try {
+            const response = await fetch('http://localhost:3000/admin/users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.status === 401 || response.status === 403) {
+                document.getElementById('error-msg').innerText = "Welcome! You are logged in as a normal user. Admin view is restricted.";
+                return;
+            }
+            
+            const users = await response.json();
+            document.getElementById('admin-panel').classList.remove('hidden');
+            const tbody = document.getElementById('users-table');
+            tbody.innerHTML = '';
+            
+            users.forEach(user => {
+                // UI Badges Logic
+                const roleBadge = user.role === 'ADMIN' 
+                    ? `<span class="badge badge-admin">ADMIN</span>` 
+                    : `<span class="badge badge-user">USER</span>`;
+                    
+                const statusBadge = user.isBlocked 
+                    ? `<span class="badge badge-blocked">Blocked</span>` 
+                    : `<span class="badge badge-active">Active</span>`;
+                    
+                const actionButton = user.role !== 'ADMIN'
+                    ? `<button class="action-btn ${user.isBlocked ? 'unblock-btn' : 'block-btn'}" onclick="toggleBlock('${user.id}')">
+                         ${user.isBlocked ? 'Unblock User' : 'Block User'}
+                       </button>`
+                    : `<span class="disabled-text">Cannot modify Admin</span>`;
+                
+                // Injecting HTML row
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: 500; color: #111827;">${user.email}</td>
+                        <td>${roleBadge}</td>
+                        <td style="text-align: center; color: #6b7280;">${user.failedLoginAttempts > 0 ? `<span style="color: #ef4444; font-weight: bold;">${user.failedLoginAttempts}</span>` : '0'}</td>
+                        <td>${statusBadge}</td>
+                        <td>${actionButton}</td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
+    }
+
+    async function toggleBlock(userId) {
+        if (!confirm('Are you sure you want to change this user\'s access status?')) return;
+        
+        await fetch(`http://localhost:3000/admin/users/${userId}/block`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        loadUsers(); 
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = 'index.html';
+    }
+
+    loadUsers();
+</script>
+</body>
+</html>
