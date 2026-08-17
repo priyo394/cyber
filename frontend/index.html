@@ -3,97 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Authentication</title>
+    <title>Aegis-X Authentication</title>
     <style>
-        /* Modern CSS Styling */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap');
         
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Rajdhani', sans-serif; }
         
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
+            background-color: #030a12;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.02) 1px, transparent 1px);
+            background-size: 30px 30px;
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
+            padding-left: 6%;
             overflow: hidden;
+            position: relative;
+            color: #00f3ff;
         }
 
+        /* Holographic Globe Background */
+        body::before {
+            content: "";
+            position: absolute;
+            right: -250px;
+            bottom: -200px;
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(circle, rgba(0, 162, 255, 0.25) 0%, rgba(3, 10, 18, 0.9) 65%);
+            border-radius: 50%;
+            box-shadow: inset 0 0 60px rgba(0, 243, 255, 0.4);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* HUD Sci-Fi Container Layout */
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            background: rgba(3, 15, 28, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid #00a2ff;
+            box-shadow: 0 0 25px rgba(0, 162, 255, 0.25),
+                        inset 0 0 15px rgba(0, 162, 255, 0.1);
+            padding: 32px 36px;
             width: 100%;
-            max-width: 400px;
-            transition: all 0.3s ease-in-out;
+            max-width: 420px;
+            position: relative;
+            z-index: 1;
+            clip-path: polygon(
+                0 0, 
+                calc(100% - 20px) 0, 
+                100% 20px, 
+                100% 100%, 
+                20px 100%, 
+                0 calc(100% - 20px)
+            );
         }
 
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h2 { color: #333; font-weight: 600; font-size: 24px; margin-bottom: 5px; }
-        .header p { color: #777; font-size: 14px; }
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background: #ffffff;
+            box-shadow: 0 0 8px #00f3ff;
+        }
 
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; color: #555; font-size: 14px; font-weight: 500; }
+        .header { text-align: left; margin-bottom: 22px; }
+        
+        /* Secure Authentication Badge Style */
+        .secure-badge {
+            display: inline-block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #00f3ff;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            padding: 2px 8px;
+            border-radius: 2px;
+            margin-bottom: 8px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .header h2 { color: #ffffff; font-weight: 700; font-size: 22px; margin-bottom: 4px; letter-spacing: 0.5px; text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
+        .header p { color: #739ac5; font-size: 12px; font-weight: 500; font-family: 'Share Tech Mono', monospace; }
+
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; margin-bottom: 5px; color: #8cb8e4; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .input-group input {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            padding: 11px 13px;
+            border: 1px solid #005f99;
+            border-radius: 4px;
             font-size: 14px;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            color: #ffffff;
+            background: rgba(1, 8, 16, 0.8);
+            font-family: 'Share Tech Mono', monospace;
+            transition: all 0.3s ease;
         }
+        .input-group input::placeholder { color: #3b5f85; }
         .input-group input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+            border-color: #00f3ff;
+            box-shadow: 0 0 12px rgba(0, 243, 255, 0.4);
             outline: none;
+            background: rgba(0, 162, 255, 0.05);
         }
 
         .btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(to right, #667eea, #764ba2);
-            color: white;
+            background: #0088cc;
+            color: #ffffff;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: 4px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 15px rgba(0, 136, 204, 0.4);
+            transition: all 0.3s ease;
+            margin-top: 5px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
         .btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+            background: #00a2ff;
+            box-shadow: 0 0 22px rgba(0, 243, 255, 0.8);
+            color: #ffffff;
         }
-        .btn:active:not(:disabled) { transform: translateY(0); }
+        .btn:active:not(:disabled) { transform: scale(0.99); }
         .btn:disabled {
-            background: #a0a0a0;
+            background: #0d233a;
+            color: #3b5f85;
             cursor: not-allowed;
             box-shadow: none;
+            border: 1px solid #1a3c61;
         }
 
-        .links { text-align: center; margin-top: 20px; font-size: 14px; }
-        .links a { color: #667eea; text-decoration: none; font-weight: 500; cursor: pointer; transition: color 0.3s; }
-        .links a:hover { color: #764ba2; text-decoration: underline; }
+        .links { text-align: center; margin-top: 18px; font-size: 12px; color: #739ac5; }
+        .links a { color: #00f3ff; text-decoration: none; font-weight: 600; cursor: pointer; transition: color 0.2s; }
+        .links a:hover { color: #ffffff; text-shadow: 0 0 6px rgba(0, 243, 255, 0.8); text-decoration: underline; }
         
-        .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .flex-between a { font-size: 13px; color: #667eea; text-decoration: none; cursor: pointer; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .flex-between label { font-size: 12px; color: #739ac5; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .flex-between a { font-size: 12px; color: #00f3ff; text-decoration: none; cursor: pointer; font-weight: 600; }
+        .flex-between a:hover { text-decoration: underline; }
         
         .hidden { display: none !important; }
 
-        /* Alert Messages */
         .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
+            padding: 10px 14px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 11px;
             text-align: center;
+            font-weight: 600;
+            font-family: 'Share Tech Mono', monospace;
             display: none;
         }
-        .alert.error { background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; display: block; }
-        .alert.success { background: #d1fae5; color: #10b981; border: 1px solid #6ee7b7; display: block; }
+        .alert.error { background: rgba(255, 0, 85, 0.15); color: #ff3366; border: 1px solid #ff0055; display: block; box-shadow: 0 0 10px rgba(255, 0, 85, 0.3); }
+        .alert.success { background: rgba(0, 243, 255, 0.15); color: #00f3ff; border: 1px solid #00f3ff; display: block; box-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
 
-        .pwd-hint { font-size: 11px; color: #888; margin-top: 5px; display: block; }
+        .pwd-hint { font-size: 10px; color: #4a75a2; margin-top: 5px; display: block; font-family: 'Share Tech Mono', monospace; }
+        
+        input[type="checkbox"] {
+            accent-color: #0088cc;
+            width: 13px;
+            height: 13px;
+        }
+
+        .terms-links {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 11px;
+            color: #4a75a2;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+        .terms-links a { color: #739ac5; text-decoration: none; cursor: pointer; }
+        .terms-links a:hover { color: #00f3ff; }
     </style>
 </head>
 <body>
@@ -104,104 +197,112 @@
     <!-- 1. LOGIN SECTION -->
     <div id="login-section">
         <div class="header">
+            <span class="secure-badge">🛡️ Aegis-X Authentication</span>
             <h2>Welcome Back</h2>
-            <p>Login to your secure account</p>
+            <p>Authenticate to access core system</p>
         </div>
         <form onsubmit="event.preventDefault(); handleLogin();">
             <div class="input-group">
-                <label>Email Address</label>
+                <label>Email Identifier</label>
                 <input type="email" id="login-email" placeholder="Enter your email" required>
             </div>
-            <div class="input-group" style="margin-bottom: 5px;">
-                <label>Password</label>
+            <div class="input-group" style="margin-bottom: 6px;">
+                <label>Access Key / Password</label>
                 <input type="password" id="login-password" placeholder="Enter your password" required>
             </div>
             <div class="flex-between">
-                <label style="font-size: 13px; color: #555;"><input type="checkbox"> Remember me</label>
-                <a onclick="switchSection('forgot-section')">Forgot Password?</a>
+                <label><input type="checkbox"> Remember Node</label>
+                <a onclick="switchSection('forgot-section')">Forgot Key?</a>
             </div>
-            <button type="submit" id="login-btn" class="btn">Login</button>
+            <button type="submit" id="login-btn" class="btn">Initialize Login</button>
         </form>
         <div class="links">
-            Don't have an account? <a onclick="switchSection('register-section')">Sign Up</a>
+            New operative? <a onclick="switchSection('register-section')">Register Identity</a>
+        </div>
+        <div class="terms-links">
+            <a href="#">Protocols</a> | <a href="#">Security Policy</a>
         </div>
     </div>
 
     <!-- 2. REGISTER SECTION -->
     <div id="register-section" class="hidden">
         <div class="header">
-            <h2>Create Account</h2>
-            <p>Join our secure platform</p>
+            <span class="secure-badge">🛡️ Aegis-X Authentication</span>
+            <h2>Create Identity</h2>
+            <p>Initialize your new secure profile</p>
         </div>
         <form onsubmit="event.preventDefault(); handleRegister();">
             <div class="input-group">
-                <label>Email Address</label>
-                <input type="email" id="reg-email" placeholder="example@domain.com" required>
+                <label>Email Identifier</label>
+                <input type="email" id="reg-email" placeholder="Enter your email" required>
             </div>
             <div class="input-group">
-                <label>Password</label>
-                <input type="password" id="reg-password" placeholder="Create a strong password" required>
-                <span class="pwd-hint">Min 8 chars, 1 uppercase, 1 number, 1 symbol</span>
+                <label>Access Key</label>
+                <input type="password" id="reg-password" placeholder="Enter your password" required>
+                <span class="pwd-hint">⚡ Min 8 chars, 1 uppercase, 1 number, 1 symbol</span>
             </div>
-            <button type="submit" class="btn">Create Account</button>
+            <button type="submit" class="btn">Register Node</button>
         </form>
         <div class="links">
-            Already have an account? <a onclick="switchSection('login-section')">Login</a>
+            Already registered? <a onclick="switchSection('login-section')">Log In</a>
         </div>
     </div>
 
     <!-- 3. 2FA VERIFICATION SECTION -->
     <div id="2fa-section" class="hidden">
         <div class="header">
+            <span class="secure-badge">🛡️ Aegis-X Authentication</span>
             <h2>Security Verification</h2>
-            <p>Enter the 6-digit code sent to your Gmail</p>
+            <p>Input 6-digit quantum auth token</p>
         </div>
         <form onsubmit="event.preventDefault(); handle2FA();">
             <div class="input-group">
-                <label>Verification Code (OTP)</label>
-                <input type="text" id="otp-code" placeholder="e.g. 123456" required autocomplete="off" maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 5px;">
+                <label>Auth Token Code</label>
+                <input type="text" id="otp-code" placeholder="000000" required autocomplete="off" maxlength="6" style="text-align: center; font-size: 22px; letter-spacing: 8px; font-weight: 700;">
             </div>
-            <button type="submit" class="btn">Verify & Login</button>
+            <button type="submit" class="btn">Verify Token</button>
         </form>
         <div class="links">
-            <a onclick="switchSection('login-section')">Back to Login</a>
+            <a onclick="switchSection('login-section')">Abort // Back to Login</a>
         </div>
     </div>
 
     <!-- 4. FORGOT PASSWORD SECTION -->
     <div id="forgot-section" class="hidden">
         <div class="header">
-            <h2>Find Account</h2>
-            <p>We'll send you a recovery token</p>
+            <span class="secure-badge">🛡️ Aegis-X Authentication</span>
+            <h2>Recovery Terminal</h2>
+            <p>Broadcast recovery signal to your mail</p>
         </div>
         <form onsubmit="event.preventDefault(); handleForgotPassword();">
             <div class="input-group">
-                <label>Email Address</label>
-                <input type="email" id="forgot-email" placeholder="Enter your registered email" required>
+                <label>Registered Email</label>
+                <input type="email" id="forgot-email" placeholder="Enter your email" required>
             </div>
             <button type="submit" class="btn">Send Reset Link</button>
         </form>
         <div class="links">
-            Remembered? <a onclick="switchSection('login-section')">Back to Login</a>
+            Remembered key? <a onclick="switchSection('login-section')">Log In</a>
         </div>
     </div>
 
     <!-- 5. RESET PASSWORD SECTION -->
     <div id="reset-section" class="hidden">
         <div class="header">
-            <h2>New Password</h2>
-            <p>Enter the token from your email</p>
+            <span class="secure-badge">🛡️ Aegis-X Authentication</span>
+            <h2>Overwrite Key</h2>
+            <p>Input recovery token and new password</p>
         </div>
         <form onsubmit="event.preventDefault(); handleResetPassword();">
             <div class="input-group">
-                <label>Reset Token</label>
-                <input type="text" id="reset-token" placeholder="Paste the long token here" required>
+                <label>Recovery Token</label>
+                <input type="text" id="reset-token" placeholder="Paste verification token" required>
             </div>
             <div class="input-group">
-                <label>New Password</label>
-                <input type="password" id="reset-new-password" placeholder="Enter new strong password" required>
+                <label>New Access Key</label>
+                <input type="password" id="reset-new-password" placeholder="Enter new password" required>
             </div>
-            <button type="submit" class="btn">Update Password</button>
+            <button type="submit" class="btn">Update Key</button>
         </form>
         <div class="links">
             <a onclick="switchSection('login-section')">Back to Login</a>
@@ -214,7 +315,6 @@
     let tempUserIdFor2FA = '';
     let countdownInterval;
 
-    // পেজ লোড হওয়ার সময় চেক করবে আগে থেকে লক করা আছে কিনা
     document.addEventListener("DOMContentLoaded", () => {
         const lockoutTarget = localStorage.getItem('lockoutTarget');
         if (lockoutTarget) {
@@ -236,7 +336,7 @@
         document.getElementById('reset-section').classList.add('hidden');
         
         document.getElementById(sectionId).classList.remove('hidden');
-        hideAlert(); // নতুন পেজে গেলে আগের এলার্ট মুছে যাবে
+        hideAlert();
     }
 
     function showAlert(message, isSuccess = false) {
@@ -266,8 +366,8 @@
 
         let initialTimeLeft = Math.ceil((targetTime - Date.now()) / 1000);
         if (initialTimeLeft > 0) {
-            showAlert(`Account locked. Try again in ${initialTimeLeft}s.`);
-            loginBtn.innerText = `Locked (${initialTimeLeft}s)`;
+            showAlert(`[SYSTEM LOCKDOWN] Retry in ${initialTimeLeft}s.`);
+            loginBtn.innerText = `LOCKED (${initialTimeLeft}s)`;
         }
 
         countdownInterval = setInterval(() => {
@@ -279,11 +379,11 @@
                 localStorage.removeItem('lockoutTarget');
                 loginBtn.disabled = false;
                 passwordInput.disabled = false;
-                loginBtn.innerText = 'Login';
+                loginBtn.innerText = 'Initialize Login';
                 hideAlert();
             } else {
-                showAlert(`Account locked. Try again in ${timeLeft}s.`);
-                loginBtn.innerText = `Locked (${timeLeft}s)`;
+                showAlert(`[SYSTEM LOCKDOWN] Retry in ${timeLeft}s.`);
+                loginBtn.innerText = `LOCKED (${timeLeft}s)`;
             }
         }, 1000);
     }
@@ -312,14 +412,13 @@
                 throw new Error(Array.isArray(data.message) ? data.message[0] : data.message);
             }
 
-            // সফল রেসপন্স: 2FA চেক করবে
             if (data.require2FA) {
                 tempUserIdFor2FA = data.userId;
-                switchSection('2fa-section'); // আগে 2FA পেজে যাবে
-                showAlert('OTP code sent to your Gmail!', true); // এরপর সেখানে এলার্টটি দেখাবে
+                switchSection('2fa-section');
+                showAlert('Auth token dispatched to mail!', true);
             } else {
                 localStorage.setItem('token', data.access_token);
-                showAlert('Login successful! Redirecting...', true);
+                showAlert('Access authorized! Redirecting...', true);
                 setTimeout(() => window.location.href = 'dashboard.html', 1500);
             }
 
@@ -342,7 +441,7 @@
 
             if (!response.ok) throw new Error(Array.isArray(data.message) ? data.message[0] : data.message);
 
-            showAlert('Registration successful! Please login.', true);
+            showAlert('Identity registered successfully! Please login.', true);
             document.getElementById('reg-email').value = '';
             document.getElementById('reg-password').value = '';
             setTimeout(() => switchSection('login-section'), 2000);
@@ -363,10 +462,10 @@
             });
             const data = await response.json();
             
-            if (!response.ok) throw new Error(data.message || 'Invalid OTP code');
+            if (!response.ok) throw new Error(data.message || 'Invalid auth token');
             
             localStorage.setItem('token', data.access_token);
-            showAlert('Verified successfully! Redirecting...', true);
+            showAlert('Token authorized! Redirecting...', true);
             setTimeout(() => window.location.href = 'dashboard.html', 1500);
         } catch (error) {
             showAlert(error.message);
@@ -384,9 +483,9 @@
             });
             const data = await response.json();
 
-            if (!response.ok) throw new Error(data.message || 'Error sending request');
+            if (!response.ok) throw new Error(data.message || 'Error processing request');
 
-            showAlert('Token sent to your email!', true);
+            showAlert('Recovery signal sent to email!', true);
             setTimeout(() => switchSection('reset-section'), 2000);
             
         } catch (error) {
@@ -408,7 +507,7 @@
 
             if (!response.ok) throw new Error(Array.isArray(data.message) ? data.message[0] : data.message);
 
-            showAlert('Password updated successfully! Please login.', true);
+            showAlert('Access key successfully updated! Please login.', true);
             
             document.getElementById('reset-token').value = '';
             document.getElementById('reset-new-password').value = '';
