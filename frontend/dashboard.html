@@ -3,198 +3,660 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Secure Authentication Administration</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        
-        body { background-color: #f3f4f6; color: #333; }
-
-        /* Navbar Styling */
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        /* Dark Theme Variables (Default) */
+        :root {
+            --bg-main: #080c14;
+            --bg-sidebar: #0c1220;
+            --bg-card: #111a2e;
+            --bg-card-hover: #16223b;
+            --primary-green: #00c875;
+            --primary-green-light: #00e676;
+            --primary-blue: #1877f2;
+            --text-white: #ffffff;
+            --text-muted: #8b99b0;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --badge-bg: #18253f;
+            --btn-blue: #0f2b48;
+            --btn-blue-text: #38bdf8;
+            --danger: #ef4444;
+            --table-hover: rgba(255, 255, 255, 0.015);
         }
-        .navbar h2 { font-size: 22px; font-weight: 600; letter-spacing: 1px; }
+
+        /* Light Theme Overrides */
+        body.light-mode {
+            --bg-main: #f1f5f9;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f8fafc;
+            --primary-green: #10b981;
+            --primary-green-light: #059669;
+            --primary-blue: #1877f2;
+            --text-white: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --badge-bg: #f1f5f9;
+            --btn-blue: #e0f2fe;
+            --btn-blue-text: #0284c7;
+            --danger: #ef4444;
+            --table-hover: #f8fafc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         
+        body { 
+            background-color: var(--bg-main); 
+            color: var(--text-white); 
+            display: flex; 
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            height: 100vh;
+            z-index: 10;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding-left: 8px;
+        }
+
+        .brand-icon {
+            font-size: 26px;
+            color: var(--primary-blue);
+        }
+
+        .brand-title {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .brand-subtitle {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--primary-green);
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item a:hover {
+            color: var(--text-white);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-item.active a {
+            background-color: var(--primary-green);
+            color: #ffffff;
+        }
+
+        .sidebar-footer {
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
         .logout-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            padding: 8px 20px;
+            width: 100%;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            padding: 12px;
             border-radius: 30px;
             cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
         }
-        .logout-btn:hover { background: white; color: #764ba2; }
 
-        /* Main Container */
-        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
-        
-        .dashboard-header {
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        /* Main Content */
+        .main-wrapper {
+            margin-left: 260px;
+            flex: 1;
+            padding: 32px 40px;
+            max-width: calc(100vw - 260px);
+        }
+
+        /* Top Bar Header */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+
+        .header-date {
+            color: var(--primary-green);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .header-title {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: 0.2s;
+        }
+
+        .icon-btn:hover { color: var(--text-white); background: var(--bg-card-hover); }
+
+        .notification-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--danger);
+            border-radius: 50%;
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 6px 16px 6px 6px;
+            border-radius: 30px;
+        }
+
+        .avatar-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--primary-green);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .user-pill-text { font-size: 13px; font-weight: 600; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: minmax(240px, 280px);
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 22px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-subtext {
+            color: var(--primary-green);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Table Card */
+        .table-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 28px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .table-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
-        .dashboard-header h3 { font-size: 20px; color: #444; }
 
-        /* Table Card Styling */
-        .table-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
+        .table-title { font-size: 18px; font-weight: 700; }
+        .manage-all-link { color: var(--primary-blue); text-decoration: none; font-size: 13px; font-weight: 600; }
+        .manage-all-link:hover { text-decoration: underline; }
 
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        thead { background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-        th { padding: 16px 24px; font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
-        td { padding: 16px 24px; font-size: 14px; color: #374151; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
-        tbody tr:hover { background-color: #f9fafb; }
+        th { 
+            color: var(--text-muted); 
+            font-size: 11px; 
+            font-weight: 700; 
+            letter-spacing: 0.5px;
+            padding: 12px 16px; 
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td { 
+            padding: 16px; 
+            font-size: 14px; 
+            border-bottom: 1px solid var(--border-color); 
+            vertical-align: middle; 
+        }
+
         tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: var(--table-hover); }
 
-        /* Badges */
-        .badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block; }
-        .badge-admin { background-color: #ede9fe; color: #5b21b6; }
-        .badge-user { background-color: #e0f2fe; color: #0369a1; }
-        .badge-active { background-color: #d1fae5; color: #065f46; }
-        .badge-blocked { background-color: #fee2e2; color: #991b1b; }
+        .user-name { font-weight: 600; color: var(--text-white); }
+        .user-email-text { color: var(--text-muted); }
 
-        /* Action Buttons */
-        .action-btn {
-            padding: 6px 14px;
-            border: none;
+        .role-badge {
+            background-color: var(--badge-bg);
+            color: var(--text-muted);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .dot-active { background-color: var(--primary-green); }
+        .text-active { color: var(--primary-green); }
+        
+        .dot-blocked { background-color: var(--danger); }
+        .text-blocked { color: var(--danger); }
+
+        .action-btn-view {
+            background-color: var(--btn-blue);
+            color: var(--btn-blue-text);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 6px 18px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             transition: 0.2s;
-            color: white;
         }
-        .block-btn { background-color: #ef4444; }
-        .block-btn:hover { background-color: #dc2626; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3); }
-        .unblock-btn { background-color: #10b981; }
-        .unblock-btn:hover { background-color: #059669; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
-        .disabled-text { color: #9ca3af; font-size: 13px; font-weight: 500; }
 
-        /* Error Message */
-        #error-msg { text-align: center; margin-top: 50px; font-size: 18px; color: #ef4444; font-weight: 500; }
-        .hidden { display: none; }
+        .action-btn-view:hover {
+            opacity: 0.8;
+        }
+
+        /* Action Bar Grid */
+        .action-bar-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .action-card-btn {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 12px;
+            color: var(--text-white);
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-card-btn:hover {
+            background-color: var(--bg-card-hover);
+        }
+
+        .btn-green-icon { color: var(--primary-green); }
+        .btn-pink-icon { color: #f472b6; }
+        .btn-purple-icon { color: #a78bfa; }
+        .btn-blue-icon { color: #38bdf8; }
+        .btn-yellow-icon { color: #facc15; }
+
+        #error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<!-- Top Navigation -->
-<div class="navbar">
-    <h2>Secure Auth</h2>
-    <button class="logout-btn" onclick="logout()">Logout</button>
-</div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div>
+            <div class="brand-header">
+                <i class="fa-solid fa-shield-halved brand-icon"></i>
+                <div>
+                    <div class="brand-title">Secure Authentication</div>
+                    <div class="brand-subtitle">ADMIN PANEL</div>
+                </div>
+            </div>
 
-<div class="container">
-    <div id="error-msg"></div>
-
-    <div id="admin-panel" class="hidden">
-        <div class="dashboard-header">
-            <h3>Registered Users Management</h3>
+            <ul class="nav-list">
+                <li class="nav-item active">
+                    <a href="#"><i class="fa-solid fa-border-all"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i class="fa-solid fa-users"></i> Manage Users</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i class="fa-solid fa-layer-group"></i> Pages Management</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i class="fa-solid fa-paper-plane"></i> Post Automation</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i class="fa-solid fa-comments"></i> Auto Responder</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i class="fa-solid fa-rectangle-ad"></i> Ads Manager</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i class="fa-solid fa-chart-line"></i> Page Analytics</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i class="fa-solid fa-code-branch"></i> API & Webhooks</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+                </li>
+            </ul>
         </div>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <main class="main-wrapper">
         
-        <div class="table-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>User Email</th>
-                        <th>Role</th>
-                        <th>Failed Attempts</th>
-                        <th>Account Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="users-table">
-                    <!-- Users will be injected here via JavaScript -->
-                </tbody>
-            </table>
+        <!-- Top Header -->
+        <header class="top-header">
+            <div>
+                <div class="header-date" id="current-date"></div>
+                <h1 class="header-title">Secure Authentication Administration</h1>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
+                    <i class="fa-regular fa-sun" id="theme-icon"></i>
+                </button>
+                <button class="icon-btn">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notification-dot"></span>
+                </button>
+                <div class="user-pill">
+                    <div class="avatar-circle">I</div>
+                    <span class="user-pill-text">Admin User</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="error-msg" class="hidden"></div>
+
+        <div id="admin-panel" class="hidden">
+            <!-- Stats Grid -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-value" id="total-users-count">0</div>
+                    <div class="stat-subtext">Live from Database</div>
+                </div>
+            </section>
+
+            <!-- Table Card -->
+            <section class="table-card">
+                <div class="table-header">
+                    <h2 class="table-title">All Registered Users</h2>
+                    <a href="#" class="manage-all-link">Manage All &rarr;</a>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>NAME / ID</th>
+                            <th>EMAIL</th>
+                            <th>ROLE</th>
+                            <th>STATUS</th>
+                            <th style="text-align: right;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table">
+                        <!-- Injected via JavaScript -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Bottom Action Bar -->
+            <section class="action-bar-grid">
+                <button class="action-card-btn">
+                    <i class="fa-solid fa-plus btn-green-icon"></i> Create Post
+                </button>
+                <button class="action-card-btn">
+                    <i class="fa-solid fa-bullhorn btn-pink-icon"></i> Run Campaign
+                </button>
+                <button class="action-card-btn">
+                    <i class="fa-solid fa-arrows-rotate btn-purple-icon"></i> Sync API
+                </button>
+                <button class="action-card-btn">
+                    <i class="fa-solid fa-download btn-blue-icon"></i> Export Logs
+                </button>
+                <button class="action-card-btn">
+                    <i class="fa-solid fa-gear btn-yellow-icon"></i> Module Settings
+                </button>
+            </section>
         </div>
-    </div>
-</div>
 
-<script>
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-        window.location.href = 'index.html';
-    }
+    </main>
 
-    async function loadUsers() {
-        try {
-            const response = await fetch('http://localhost:3000/admin/users', {
+    <script>
+        // Theme Toggle Logic
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            body.classList.toggle('light-mode');
+            
+            if (body.classList.contains('light-mode')) {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+            const themeIcon = document.getElementById('theme-icon');
+            if (themeIcon) {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        }
+
+        // Dynamic Date Generation
+        function updateDynamicDate() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = today.toLocaleDateString('en-US', options).toUpperCase();
+            document.getElementById('current-date').innerText = formattedDate;
+        }
+
+        updateDynamicDate();
+
+        // Auth & Admin User Loading Logic
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('http://localhost:3000/admin/users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.status === 401 || response.status === 403) {
+                    const errorDiv = document.getElementById('error-msg');
+                    errorDiv.innerText = "Welcome! You are logged in as a normal user. Admin view is restricted.";
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+                
+                const users = await response.json();
+                document.getElementById('admin-panel').classList.remove('hidden');
+                
+                document.getElementById('total-users-count').innerText = users.length;
+
+                const tbody = document.getElementById('users-table');
+                tbody.innerHTML = '';
+                
+                users.forEach(user => {
+                    const userName = user.email.split('@')[0];
+
+                    const statusHTML = user.isBlocked 
+                        ? `<div class="status-indicator text-blocked"><span class="status-dot dot-blocked"></span> Blocked</div>` 
+                        : `<div class="status-indicator text-active"><span class="status-dot dot-active"></span> Active</div>`;
+                        
+                    const actionButton = user.role !== 'ADMIN'
+                        ? `<button class="action-btn-view" onclick="toggleBlock('${user.id}')">
+                             ${user.isBlocked ? 'Unblock' : 'Block'}
+                           </button>`
+                        : `<button class="action-btn-view" style="opacity: 0.5; cursor: not-allowed;" disabled>Admin</button>`;
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="user-name">${userName}</td>
+                            <td class="user-email-text">${user.email}</td>
+                            <td><span class="role-badge">${user.role === 'ADMIN' ? 'Admin' : 'User'}</span></td>
+                            <td>${statusHTML}</td>
+                            <td style="text-align: right;">${actionButton}</td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        async function toggleBlock(userId) {
+            if (!confirm('Are you sure you want to change this user\'s access status?')) return;
+            
+            await fetch(`http://localhost:3000/admin/users/${userId}/block`, {
+                method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            
-            if (response.status === 401 || response.status === 403) {
-                document.getElementById('error-msg').innerText = "Welcome! You are logged in as a normal user. Admin view is restricted.";
-                return;
-            }
-            
-            const users = await response.json();
-            document.getElementById('admin-panel').classList.remove('hidden');
-            const tbody = document.getElementById('users-table');
-            tbody.innerHTML = '';
-            
-            users.forEach(user => {
-                // UI Badges Logic
-                const roleBadge = user.role === 'ADMIN' 
-                    ? `<span class="badge badge-admin">ADMIN</span>` 
-                    : `<span class="badge badge-user">USER</span>`;
-                    
-                const statusBadge = user.isBlocked 
-                    ? `<span class="badge badge-blocked">Blocked</span>` 
-                    : `<span class="badge badge-active">Active</span>`;
-                    
-                const actionButton = user.role !== 'ADMIN'
-                    ? `<button class="action-btn ${user.isBlocked ? 'unblock-btn' : 'block-btn'}" onclick="toggleBlock('${user.id}')">
-                         ${user.isBlocked ? 'Unblock User' : 'Block User'}
-                       </button>`
-                    : `<span class="disabled-text">Cannot modify Admin</span>`;
-                
-                // Injecting HTML row
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight: 500; color: #111827;">${user.email}</td>
-                        <td>${roleBadge}</td>
-                        <td style="text-align: center; color: #6b7280;">${user.failedLoginAttempts > 0 ? `<span style="color: #ef4444; font-weight: bold;">${user.failedLoginAttempts}</span>` : '0'}</td>
-                        <td>${statusBadge}</td>
-                        <td>${actionButton}</td>
-                    </tr>
-                `;
-            });
-        } catch (error) {
-            console.error('Error loading users:', error);
+            loadUsers(); 
         }
-    }
 
-    async function toggleBlock(userId) {
-        if (!confirm('Are you sure you want to change this user\'s access status?')) return;
-        
-        await fetch(`http://localhost:3000/admin/users/${userId}/block`, {
-            method: 'PATCH',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        loadUsers(); 
-    }
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        }
 
-    function logout() {
-        localStorage.removeItem('token');
-        window.location.href = 'index.html';
-    }
-
-    loadUsers();
-</script>
+        loadUsers();
+    </script>
 </body>
 </html>
